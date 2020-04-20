@@ -20,6 +20,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,24 +32,24 @@ import poc.kafka.properties.KafkaProperties;
 @Slf4j
 @SuppressWarnings({ "unused" })
 public class ConsumerService {
-
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private KafkaProperties kp;
 	private AtomicInteger count = new AtomicInteger(0);
 
 	private void consume() {
-		log.debug("consume service");
+		logger.debug("consume service");
 
 		String[] partitions = kp.getMetaData().get("partitions").split("\\,");
-		log.debug("partitions: " + Arrays.toString(partitions));
+		logger.debug("partitions: " + Arrays.toString(partitions));
 		int nPartitions = partitions.length;
-		log.debug("nPartitions: " + nPartitions);
+		logger.debug("nPartitions: " + nPartitions);
 
 		ExecutorService es = Executors.newFixedThreadPool(nPartitions);
 		AtomicInteger ai = new AtomicInteger(0);
 
 		String topic = kp.getMetaData().get("topic");
-		log.debug("topic: " + topic);
+		logger.debug("topic: " + topic);
 
 		for (int i = 0; i < nPartitions; i++) {
 			es.submit(() -> {
@@ -55,7 +57,7 @@ public class ConsumerService {
 
 				int partition = Integer.valueOf(partitions[ai.getAndIncrement()]);
 
-				log.debug("partition: " + partition);
+				logger.debug("partition: " + partition);
 
 				TopicPartition tp = new TopicPartition(topic, partition);
 				consumer.assign(Arrays.asList(tp));
@@ -90,7 +92,7 @@ public class ConsumerService {
 						// 17
 						int astGroupSeqNmbr = (bb.getInt(438));
 
-						log.debug("astSeqNmbr: " + astSeqNmbr + ", astActySymblName: " + astActySymblName
+						logger.debug("astSeqNmbr: " + astSeqNmbr + ", astActySymblName: " + astActySymblName
 								+ ", astActySeries: " + astActySeries + ", astMktNmbr: " + astMktNmbr
 								+ ", astActyTypeNmbr: " + astActyTypeNmbr + ", aeaMachineNmbr: " + aeaMachineNmbr
 								+ ", aeagroupId: " + aeagroupId + ", astGroupSeqNmbr: " + astGroupSeqNmbr);
@@ -106,7 +108,7 @@ public class ConsumerService {
 		ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 
 		timer.scheduleAtFixedRate(() -> {
-			log.debug("count: " + count.get());
+			logger.debug("count: " + count.get());
 		}, 10, 10, TimeUnit.SECONDS);
 	}
 
@@ -119,12 +121,12 @@ public class ConsumerService {
 	}
 
 	private Consumer<Short, ByteBuffer> consumer() {
-		log.debug("consumer service");
+		logger.debug("consumer service");
 
 		Properties kafkaProps = new Properties();
 
 		kp.getKafkaConsumer().forEach((k, v) -> {
-			log.debug("k: " + k + ", v: " + v);
+			logger.debug("k: " + k + ", v: " + v);
 			kafkaProps.put(k, v);
 		});
 
@@ -132,7 +134,7 @@ public class ConsumerService {
 	}
 
 	public void main() {
-		log.debug("main service");
+		logger.debug("main service");
 
 		consume();
 	}

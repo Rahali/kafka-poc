@@ -1,5 +1,7 @@
 package poc.kafka;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +17,7 @@ import poc.kafka.service.KafkaService;
 @SpringBootApplication
 @Slf4j
 public class KafkaApp implements CommandLineRunner {
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private KafkaService kafkaService;
@@ -25,7 +28,7 @@ public class KafkaApp implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		log.info("run service");
+		logger.info("run service");
 
 		kafkaService.main();
 	}
